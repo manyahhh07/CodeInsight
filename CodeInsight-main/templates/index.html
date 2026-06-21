@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CodeInsight</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f0f4f2;
+      --surface:   #f8faf9;
+      --surface2:  #eef3f0;
+      --surface3:  #e4ede8;
+      --border:    #d4e2da;
+      --border2:   #b8d0c4;
+      --text:      #2d3f36;
+      --muted:     #7a9e8c;
+      --muted2:    #5a8270;
+      --accent:    #5bb89a;
+      --accent-dim:#d0ede4;
+      --accent2:   #7ab8d8;
+      --accent2-dim:#d0e8f4;
+      --warn:      #e0a050;
+      --err:       #d06060;
+      --info:      #5aabcc;
+      --grey:      #8fa8a0;
+      --mono:      'DM Mono', 'Fira Code', monospace;
+      --sans:      'DM Sans', system-ui, sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    /* ━━ TOP BAR ━━ */
+    .topbar {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 54px;
+      padding: 0 20px;
+      background: var(--surface);
+      border-bottom: 1.5px solid var(--border);
+      flex-shrink: 0;
+      box-shadow: 0 1px 6px rgba(90,130,112,0.07);
+    }
+    .logo {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    .logo span { color: var(--accent); }
+    .logo em { color: var(--accent2); font-style: normal; }
+    .topbar-status {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: var(--mono);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3px 10px;
+    }
+    .btn-analyze {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      border: none;
+      padding: 8px 22px;
+      border-radius: 8px;
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+      box-shadow: 0 2px 10px rgba(91,184,154,0.25);
+      letter-spacing: 0.01em;
+    }
+    .btn-analyze:hover  { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(91,184,154,0.35); }
+    .btn-analyze:active { transform: translateY(0); box-shadow: none; }
+    .btn-analyze:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* ━━ 3-COLUMN GRID ━━ */
+    .main {
+      display: grid;
+      grid-template-columns: 152px 1fr 400px;
+      height: calc(100vh - 54px);
+      overflow: hidden;
+    }
+
+    /* ━━ LANGUAGE SIDEBAR ━━ */
+    .lang-sidebar {
+      background: var(--surface);
+      border-right: 1.5px solid var(--border);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border2) transparent;
+    }
+    .lang-sidebar::-webkit-scrollbar { width: 3px; }
+    .lang-sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    .sidebar-label {
+      padding: 13px 14px 8px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .lang-btn {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      padding: 8px 14px;
+      background: none;
+      border: none;
+      border-left: 2px solid transparent;
+      color: var(--muted2);
+      font-family: var(--sans);
+      font-size: 12.5px;
+      font-weight: 400;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.12s;
+    }
+    .lang-btn:hover { background: var(--surface2); color: var(--text); border-left-color: var(--border2); }
+    .lang-btn.active { background: var(--accent-dim); color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+    .lang-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .lang-btn:not(.active) .lang-dot { opacity: 0.5; }
+
+    .dot-python{background:#7ab8d8} .dot-javascript{background:#e0c060}
+    .dot-typescript{background:#5aabcc} .dot-java{background:#e09060}
+    .dot-cpp{background:#a090d0} .dot-c{background:#90a8b8}
+    .dot-csharp{background:#8090e0} .dot-kotlin{background:#d090d0}
+    .dot-ruby{background:#e07080} .dot-html{background:#e09060}
+    .dot-r{background:#60c8b8} .dot-sql{background:#d8b840}
+    .dot-scala{background:#e08080} .dot-dart{background:#50c0d8}
+    .dot-php{background:#b090d0} .dot-rust{background:#e09060}
+    .dot-swift{background:#e08050} .dot-go{background:#60c0c8}
+
+    /* ━━ EDITOR ━━ */
+    .editor-panel {
+      display: flex;
+      flex-direction: column;
+      border-right: 1.5px solid var(--border);
+      background: #fbfdfb;
+      overflow: hidden;
+    }
+    .editor-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .editor-bar-left { display: flex; align-items: center; gap: 10px; }
+    .lang-badge {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--border2);
+      border-radius: 5px;
+      padding: 2px 9px;
+    }
+    .line-count { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+    .kb-hint    { font-size: 10px; color: var(--muted); font-family: var(--mono); background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; }
+
+    #code {
+      flex: 1;
+      background: transparent;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.78;
+      padding: 20px 22px;
+      border: none;
+      outline: none;
+      resize: none;
+      tab-size: 2;
+    }
+    #code::placeholder { color: var(--muted); opacity: 0.55; font-style: italic; }
+    #code:focus { background: #f7fcf9; }
+
+    /* ━━ RESULTS ━━ */
+    .results-panel {
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      background: var(--surface);
+      scrollbar-width: thin;
+      scrollbar-color: var(--border2) transparent;
+    }
+    .results-panel::-webkit-scrollbar { width: 3px; }
+    .results-panel::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    /* scores */
+    .score-row { display: grid; grid-template-columns: 1fr 1fr 1fr; border-bottom: 1.5px solid var(--border); }
+    .score-card { padding: 18px 10px; text-align: center; border-right: 1px solid var(--border); background: var(--surface); }
+    .score-card:last-child { border-right: none; }
+    .sc-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .sc-num   { font-size: 30px; font-weight: 700; font-family: var(--mono); line-height: 1; }
+    .sc-sub   { font-size: 10px; color: var(--grey); margin-top: 5px; }
+
+    /* metrics */
+    .metrics-row { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 12px; border-bottom: 1.5px solid var(--border); background: var(--surface2); }
+    .chip { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 5px 10px; font-size: 10px; color: var(--muted2); }
+    .chip strong { display: block; font-size: 14px; font-weight: 600; color: var(--text); font-family: var(--mono); }
+
+    /* signals */
+    .signal-block { padding: 10px 13px; border-bottom: 1.5px solid var(--border); background: var(--surface); }
+    .sig-title { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+    .sig-tag {
+      display: inline-flex; align-items: flex-start; gap: 6px;
+      font-size: 11px; line-height: 1.4; color: var(--text);
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 5px 9px; margin: 0 4px 4px 0;
+    }
+    .sdot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+
+    /* issues */
+    .issues-hdr {
+      padding: 8px 13px; font-size: 9px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+      border-bottom: 1.5px solid var(--border); background: var(--surface2);
+      position: sticky; top: 0; z-index: 5;
+    }
+    .issue { padding: 11px 13px; border-bottom: 1px solid var(--border); transition: background 0.1s; background: var(--surface); }
+    .issue:hover { background: var(--surface2); }
+    .issue-top { display: flex; align-items: flex-start; gap: 8px; }
+    .sev-pill {
+      font-size: 8px; font-weight: 700; letter-spacing: 0.07em;
+      text-transform: uppercase; padding: 2px 7px; border-radius: 4px; flex-shrink: 0; margin-top: 1px;
+    }
+    .sev-error   { background:#fae8e8; color:var(--err);  border:1px solid #e8c8c8; }
+    .sev-warning { background:#faf0e0; color:var(--warn); border:1px solid #e8d8b0; }
+    .sev-info    { background:#e0f0f8; color:var(--info); border:1px solid #b0d8ec; }
+    .issue-msg { font-size: 12px; line-height: 1.45; color: var(--text); flex: 1; }
+    .cat-badge {
+      font-size: 8px; padding: 2px 6px; border-radius: 4px;
+      background: var(--surface3); color: var(--grey);
+      border: 1px solid var(--border);
+      text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0;
+    }
+    .issue-line { font-size: 10px; color: var(--muted); margin-top: 4px; font-family: var(--mono); }
+    .suggestion { font-size: 11px; color: var(--accent2); margin-top: 6px; line-height: 1.4; }
+    .toggle-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 10px; color: var(--muted2); background: none; border: none;
+      cursor: pointer; padding: 4px 0 0; font-family: var(--sans); transition: color 0.1s;
+    }
+    .toggle-btn:hover { color: var(--accent); }
+    .fix-block {
+      margin-top: 7px; background: var(--surface2); border: 1.5px solid var(--border2);
+      border-radius: 7px; padding: 9px 12px; font-family: var(--mono);
+      font-size: 10.5px; color: #3a7060; line-height: 1.7;
+      white-space: pre-wrap; word-break: break-word;
+    }
+
+    /* empty / loading */
+    .empty-state {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px; color: var(--muted); padding: 40px; text-align: center;
+    }
+    .empty-icon { font-size: 34px; opacity: 0.3; }
+    .empty-state p { font-size: 13px; line-height: 1.8; color: var(--muted2); }
+    .loading-state {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      gap: 10px; color: var(--muted); font-size: 13px;
+    }
+    .spinner {
+      width: 15px; height: 15px;
+      border: 2px solid var(--border2); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.65s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* score ring effect */
+    .sc-num { transition: color 0.3s; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-status" id="statusText">ready</div>
+  <div class="logo">Code<span>Insight</span></div>
+  <button class="btn-analyze" id="analyzeBtn" onclick="runAnalysis()">Analyze</button>
+</div>
+
+<div class="main">
+
+  <div class="lang-sidebar">
+    <div class="sidebar-label">Language</div>
+    <button class="lang-btn active" data-lang="python">    <span class="lang-dot dot-python"></span>Python</button>
+    <button class="lang-btn" data-lang="javascript">       <span class="lang-dot dot-javascript"></span>JavaScript</button>
+    <button class="lang-btn" data-lang="typescript">       <span class="lang-dot dot-typescript"></span>TypeScript</button>
+    <button class="lang-btn" data-lang="java">             <span class="lang-dot dot-java"></span>Java</button>
+    <button class="lang-btn" data-lang="cpp">              <span class="lang-dot dot-cpp"></span>C++</button>
+    <button class="lang-btn" data-lang="c">                <span class="lang-dot dot-c"></span>C</button>
+    <button class="lang-btn" data-lang="csharp">           <span class="lang-dot dot-csharp"></span>C#</button>
+    <button class="lang-btn" data-lang="kotlin">           <span class="lang-dot dot-kotlin"></span>Kotlin</button>
+    <button class="lang-btn" data-lang="ruby">             <span class="lang-dot dot-ruby"></span>Ruby</button>
+    <button class="lang-btn" data-lang="html">             <span class="lang-dot dot-html"></span>HTML / CSS</button>
+    <button class="lang-btn" data-lang="r">                <span class="lang-dot dot-r"></span>R</button>
+    <button class="lang-btn" data-lang="sql">              <span class="lang-dot dot-sql"></span>SQL</button>
+    <button class="lang-btn" data-lang="scala">            <span class="lang-dot dot-scala"></span>Scala</button>
+    <button class="lang-btn" data-lang="dart">             <span class="lang-dot dot-dart"></span>Dart</button>
+    <button class="lang-btn" data-lang="php">              <span class="lang-dot dot-php"></span>PHP</button>
+    <button class="lang-btn" data-lang="rust">             <span class="lang-dot dot-rust"></span>Rust</button>
+    <button class="lang-btn" data-lang="swift">            <span class="lang-dot dot-swift"></span>Swift</button>
+    <button class="lang-btn" data-lang="go">               <span class="lang-dot dot-go"></span>Go</button>
+  </div>
+
+  <div class="editor-panel">
+    <div class="editor-bar">
+      <div class="editor-bar-left">
+        <span class="lang-badge" id="langBadge">Python</span>
+        <span class="line-count" id="lineCount">0 lines</span>
+      </div>
+      <span class="kb-hint">Ctrl+Enter to run</span>
+    </div>
+    <textarea id="code" spellcheck="false" placeholder="Paste your code here..."></textarea>
+  </div>
+
+  <div class="results-panel" id="results">
+    <div class="empty-state">
+      <div class="empty-icon">&#9998;</div>
+      <p>Pick a language,<br>paste your code,<br>and click Analyze.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const LABELS = {
+    python:'Python', javascript:'JavaScript', typescript:'TypeScript',
+    java:'Java', cpp:'C++', c:'C', csharp:'C#', kotlin:'Kotlin',
+    ruby:'Ruby', html:'HTML / CSS', r:'R', sql:'SQL', scala:'Scala',
+    dart:'Dart', php:'PHP', rust:'Rust', swift:'Swift', go:'Go'
+  };
+
+  let selectedLang = 'python';
+
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedLang = btn.dataset.lang;
+      document.getElementById('langBadge').textContent = LABELS[selectedLang] || selectedLang;
+    });
+  });
+
+  document.getElementById('code').addEventListener('input', () => {
+    const n = document.getElementById('code').value.split('\n').length;
+    document.getElementById('lineCount').textContent = `${n} line${n!==1?'s':''}`;
+  });
+
+  document.getElementById('code').addEventListener('keydown', e => {
+    if ((e.ctrlKey||e.metaKey) && e.key==='Enter') runAnalysis();
+  });
+
+  function hColor(s) { return s>=80?'#5bb89a':s>=55?'#e0a050':'#d06060'; }
+  function hLabel(s) { return s>=90?'Excellent':s>=75?'Good':s>=55?'Fair':'Poor'; }
+  function nColor(s) { return s>=75?'#5bb89a':s>=50?'#e0a050':'#d06060'; }
+  function aColor(s) { return s<=20?'#5bb89a':s<=50?'#e0a050':'#d06060'; }
+  function aLabel(s) { return s<=20?'Unlikely':s<=50?'Possible':'Likely'; }
+
+  async function runAnalysis() {
+    const code = document.getElementById('code').value.trim();
+    if (!code) return;
+    const btn = document.getElementById('analyzeBtn');
+    btn.disabled = true;
+    document.getElementById('statusText').textContent = 'analyzing...';
+    document.getElementById('results').innerHTML =
+      '<div class="loading-state"><div class="spinner"></div>Analyzing...</div>';
+    try {
+      const res = await fetch('/analyze', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({code, language: selectedLang})
+      });
+      const data = await res.json();
+      render(data);
+      document.getElementById('statusText').textContent = `score ${data.score}/100`;
+    } catch {
+      document.getElementById('results').innerHTML =
+        '<div class="loading-state">Connection error — is Flask running?</div>';
+      document.getElementById('statusText').textContent = 'error';
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function render(d) {
+    const {score, naturalness_score:nat=0, ai_likelihood_score:ai=0,
+           naturalness_reasons:natR=[], ai_reasons:aiR=[],
+           issues:raw=[], metrics:m={}} = d;
+
+    const issues = [...raw].sort((a,b)=>
+      ({error:0,warning:1,info:2}[a.severity]??3)-({error:0,warning:1,info:2}[b.severity]??3));
+    const errs = issues.filter(i=>i.severity==='error').length;
+    const wrns = issues.filter(i=>i.severity==='warning').length;
+
+    let h = `<div class="score-row">
+      <div class="score-card">
+        <div class="sc-label">Health</div>
+        <div class="sc-num" style="color:${hColor(score)}">${score}</div>
+        <div class="sc-sub">${hLabel(score)}</div>
+      </div>
+      <div class="score-card">
+        <div class="sc-label">Naturalness</div>
+        <div class="sc-num" style="color:${nColor(nat)}">${nat}</div>
+        <div class="sc-sub">human feel</div>
+      </div>
+      <div class="score-card">
+        <div class="sc-label">AI likelihood</div>
+        <div class="sc-num" style="color:${aColor(ai)}">${ai}</div>
+        <div class="sc-sub">${aLabel(ai)}</div>
+      </div>
+    </div>`;
+
+    const chips = [
+      [m.total_lines,'lines'],[m.function_count,'functions'],
+      [m.avg_complexity,'avg complexity'],[m.max_nesting_depth,'max depth'],
+      [m.docstring_coverage!=null?m.docstring_coverage+'%':null,'documented'],
+      [m.comment_ratio!=null?m.comment_ratio+'%':null,'comments'],
+    ].filter(([v])=>v!=null);
+    if (chips.length) {
+      h += `<div class="metrics-row">${chips.map(([v,l])=>`<div class="chip"><strong>${v}</strong>${l}</div>`).join('')}</div>`;
+    }
+
+    if (natR.length) {
+      h += `<div class="signal-block"><div class="sig-title">Naturalness signals</div>`;
+      natR.forEach(r => {
+        h += `<span class="sig-tag"><span class="sdot" style="background:${r.startsWith('Good')?'#5bb89a':'#e0a050'}"></span>${esc(r)}</span>`;
+      });
+      h += `</div>`;
+    }
+
+    if (aiR.length) {
+      h += `<div class="signal-block"><div class="sig-title">AI / plagiarism signals</div>`;
+      aiR.forEach(r => {
+        h += `<span class="sig-tag"><span class="sdot" style="background:#d06060"></span>${esc(r)}</span>`;
+      });
+      h += `</div>`;
+    }
+
+    h += `<div class="issues-hdr">${issues.length} issue${issues.length!==1?'s':''} &nbsp;·&nbsp; ${errs} error${errs!==1?'s':''}, ${wrns} warning${wrns!==1?'s':''}</div>`;
+
+    if (!issues.length) {
+      h += `<div style="padding:36px;text-align:center;color:var(--muted);font-size:13px">No issues found — looks clean ✓</div>`;
+    } else {
+      issues.forEach((issue, i) => {
+        const hint = issue.fix_hint?.trim();
+        h += `<div class="issue">
+          <div class="issue-top">
+            <span class="sev-pill sev-${issue.severity}">${issue.severity}</span>
+            <span class="issue-msg">${esc(issue.message)}</span>
+            <span class="cat-badge">${issue.category}</span>
+          </div>
+          ${issue.line?`<div class="issue-line">line ${issue.line}</div>`:''}
+          ${issue.suggestion?`<div class="suggestion">&#128161; ${esc(issue.suggestion)}</div>`:''}
+          ${hint?`
+            <button class="toggle-btn" onclick="tog(${i})">
+              <span id="a${i}">&#9654;</span> show fix
+            </button>
+            <div class="fix-block" id="h${i}" style="display:none">${esc(hint)}</div>
+          `:''}
+        </div>`;
+      });
+    }
+
+    document.getElementById('results').innerHTML = h;
+  }
+
+  function esc(s) {
+    return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function tog(i) {
+    const el=document.getElementById('h'+i), ar=document.getElementById('a'+i);
+    const show=el.style.display==='none';
+    el.style.display=show?'block':'none';
+    ar.innerHTML=show?'&#9660;':'&#9654;';
+  }
+</script>
+</body>
+</html>
