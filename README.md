@@ -31,7 +31,6 @@ Built with **Python + Flask**, using **AST-based parsing for Python** and **heur
 ---
 
 ## Screenshots
-
 ### Homepage
 
 ![Homepage](screenshots/homepage.png)
