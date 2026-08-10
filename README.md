@@ -1,4 +1,3 @@
-<div align="center">
 
 # CodeInsight – Multi-Language Static Code Analyzer
 
