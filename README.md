@@ -276,7 +276,7 @@ The analyzer scans for:
 
 ### Future Upgrade Path
 
-Planned migration **Tree-sitter multi-language AST parsing** for deeper semantic analysis across all supported languages.
+Planned migration to **Tree-sitter multi-language AST parsing** for deeper semantic analysis across all supported languages.
 
 ---
 
