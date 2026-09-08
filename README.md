@@ -17,6 +17,8 @@ Built with **Python + Flask**, using **AST-based parsing for Python** and **heur
 </div>
 
 ---
+
+
 ## Features
 
 * **Code Quality Scoring** — Weighted 0–100 maintainability score based on severity analysis
