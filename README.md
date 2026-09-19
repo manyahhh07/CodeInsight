@@ -1,6 +1,5 @@
 <div align="center">
 
-
 # CodeInsight – Multi-Language Static Code Analyzer
 
 Production-grade static analysis platform that evaluates code quality, detects security flaws, measures code naturalness, and estimates AI-generated likelihood across **18 programming languages**.
@@ -12,7 +11,6 @@ Built with **Python + Flask**, using **AST-based parsing for Python** and **heur
 ![Static Analysis](https://img.shields.io/badge/Analysis-Static-success)
 ![Languages](https://img.shields.io/badge/Languages-18-orange)
 ![License](https://img.shields.io/badge/License-MIT-blue)
-
 
 </div>
 
