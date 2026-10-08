@@ -1,6 +1,6 @@
 <div align="center">
 
-# CodeInsight – Multi-Language Static Code Analyzer
+# CodeInsight – Multi-Language Static Code Analy
 
 Production-grade static analysis platform that evaluates code quality, detects security flaws, measures code naturalness, and estimates AI-generated likelihood across **18 programming languages**.
 
