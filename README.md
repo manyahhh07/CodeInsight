@@ -19,7 +19,7 @@ Built with **Python + Flask**, using **AST-based parsing for Python** and **heur
 
 ## Features
 
-* **Code Quality Scoring** — Weighted 0–100 maintainability score based on severity an
+* **Code Quality Scoring** — Weighted 0–100 maintainability score based on severity ananlysis
 * **AI Likelihood Detection** — Estimates probability of AI-generated or template-heavy code
 * **Naturalness Analysis** — Evaluates how human-written code feels structurally
 * **Security Scanning** — Detects unsafe patterns, hardcoded secrets, and risky constructs
